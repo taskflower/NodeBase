@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Tło -->
+  <rect width="200" height="200" fill="#f9f9f9" />
+  
+  <!-- Płatki zewnętrzne -->
+  <g fill="#f4a261">
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(0 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(45 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(90 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(135 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(180 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(225 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(270 100 100)" />
+    <path d="M100,100 Q120,60 100,20 Q80,60 100,100 Z" transform="rotate(315 100 100)" />
+  </g>
+
+  <!-- Płatki wewnętrzne -->
+  <g fill="#e76f51">
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(22.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(67.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(112.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(157.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(202.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(247.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(292.5 100 100)" />
+    <path d="M100,100 Q115,80 100,40 Q85,80 100,100 Z" transform="rotate(337.5 100 100)" />
+  </g>
+
+  <!-- Środek kwiatu -->
+  <circle cx="100" cy="100" r="15" fill="#f4a261" />
+</svg>
