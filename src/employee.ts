@@ -1,9 +1,9 @@
 import fs from "fs-extra";
 import path from "path";
-import { TaskManager } from "./taskManager.js"; // Dodaj .js
-import { ModelConnector } from "./modelConnector.js"; // Dodaj .js
-import { Task } from "./types/task.types.js"; // Dodaj .js
-import { EmployeeData } from "./types/employee.types.js"; // Dodaj .js
+import { TaskManager } from "./taskManager.js";
+import { ModelConnector } from "./modelConnector.js";
+import { Task } from "./types/task.types.js";
+import { EmployeeData } from "./types/employee.types.js";
 import {
   logCEOAnalyzesTask,
   logStartTask,
@@ -12,9 +12,8 @@ import {
   logTaskReviewComplete,
   logSubtasksComplete,
   logTaskError,
-} from "./output/employeeReporter.js"; // Dodaj .js
-import { OutputHelper } from "./output/outputHelper.js"; // Dodaj .js
-
+} from "./output/employeeReporter.js";
+import { OutputHelper } from "./output/outputHelper.js";
 
 export class Employee implements EmployeeData {
   public readonly id: string;
@@ -101,7 +100,7 @@ export class Employee implements EmployeeData {
 
       return updatedTask;
     } catch (error) {
-      logTaskError(task, error); 
+      logTaskError(task, error);
       return task;
     }
   }
@@ -131,26 +130,34 @@ export class Employee implements EmployeeData {
         OutputHelper.error(`Invalid parent task ID: ${parentTaskId}`);
         return [];
       }
-      logTaskError({ id: taskId, title: "Unknown" } as Task, error); // Tworzymy pełny obiekt
+      logTaskError({ id: taskId, title: "Unknown" } as Task, error);
       return [];
     }
   }
 
   private async doWork(task: Task): Promise<{ output: string }> {
-    const result = await this.modelConnector.processTask(task, this.role);
+    const result = await this.modelConnector.processTask(
+      task,
+      this.role,
+      this.permissions
+    );
     return {
       output: typeof result === "string" ? result : JSON.stringify(result),
     };
   }
 
   private async reviewTask(task: Task): Promise<{ output: string }> {
-    const result = await this.modelConnector.processTask(task, this.role);
+    const result = await this.modelConnector.processTask(
+      task,
+      this.role,
+      this.permissions
+    );
     return {
       output: typeof result === "string" ? result : JSON.stringify(result),
     };
   }
 
   private async processCEOTask(task: Task): Promise<void> {
-    await this.modelConnector.processTask(task, this.role);
+    await this.modelConnector.processTask(task, this.role, this.permissions);
   }
 }

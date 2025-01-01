@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { Company } from "./company.js";
 import { OutputHelper } from "./output/outputHelper.js";
 import figlet from "figlet";
-import chalk from 'chalk';
+import chalk from "chalk";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,7 +34,7 @@ async function main() {
   const output = figlet.textSync("TaskFlower", { font: "Roman" });
   console.log("\n");
   console.log("\n");
-  console.log("0.0.1");
+  console.log("1.0.0 - Autonomous Edition");
   console.log(chalk.yellow(output));
   const { default: inquirer } = await import("inquirer"); // Dynamiczny import
   while (true) {
@@ -49,11 +49,11 @@ async function main() {
           "- Create task",
           "- View tasks",
           "- List employees",
+          "- View organization state",
+          "- Update autonomy config",
           new inquirer.Separator(),
           "- Exit",
-          new inquirer.Separator(),
           "- Reset app",
-          new inquirer.Separator(),
         ],
       },
     ]);
@@ -70,6 +70,12 @@ async function main() {
         break;
       case "- View tasks":
         await company.viewTasks();
+        break;
+      case "- View organization state":
+        await company.viewOrganizationState();
+        break;
+      case "- Update autonomy config":
+        await company.updateAutonomyConfig();
         break;
       case "- Reset app":
         await resetApp();

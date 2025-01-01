@@ -7,19 +7,89 @@ import {
   ReviewResult, 
   FinalReviewResult, 
   TaskWithSubordinates 
-} from "./types/task.types.js"; // Dodano .js
-import { MockAPIService } from "./mockServices.js"; // Dodano .js
-import { IModelConnector } from "./types/modelConnector.types.js"; // Dodano .js
+} from "./types/task.types.js";
+import { MockAPIService } from "./mockServices.js";
+import { IModelConnector } from "./types/modelConnector.types.js";
+import { OrganizationStateManager } from "./organizationState.js";
+import { TaskManager } from "./taskManager.js";
 
 export class ModelConnector implements IModelConnector {
   private API_URL: string;
   private API_KEY: string;
   public externalServices: MockAPIService;
+  private orgStateManager: OrganizationStateManager;
+  private taskManager: TaskManager;
 
-  constructor() {
+  constructor(configPath: string, taskManager: TaskManager) {
     this.API_URL = "https://api.openai.com/v1/chat/completions";
     this.API_KEY = process.env.OPENAI_API_KEY || "";
     this.externalServices = new MockAPIService();
+    this.orgStateManager = new OrganizationStateManager(configPath);
+    this.taskManager = taskManager;
+  }
+
+  private async convertSuggestionToTask(suggestion: any): Promise<Task> {
+    return {
+      id: Date.now(),
+      title: suggestion.title,
+      what: suggestion.description,
+      who: suggestion.who || "SYSTEM",
+      to: suggestion.assignee,
+      type: suggestion.type,
+      status: "pending",
+      created: new Date().toISOString()
+    };
+  }
+
+  async analyzeOrganizationState(): Promise<void> {
+    const state = this.orgStateManager.getState();
+    const prompt = `
+      Przeanalizuj stan organizacji i zaproponuj działania:
+      ${JSON.stringify(state, null, 2)}
+    `;
+
+    const response = await this.callLLM(prompt);
+    const analysis = JSON.parse(response);
+    
+    if (analysis.shouldCreateTasks) {
+      await this.createAutonomousTasks(analysis.suggestedTasks);
+    }
+  }
+
+  private async callLLM(prompt: string): Promise<string> {
+    const response = await fetch(this.API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [{ role: "system", content: prompt }],
+      }),
+    });
+
+    const responseData = await response.json();
+    return responseData.choices[0].message.content;
+  }
+
+  private async createAutonomousTasks(suggestions: any[]): Promise<void> {
+    const state = this.orgStateManager.getState();
+    const config = state.autonomyConfig;
+
+    for (const suggestion of suggestions) {
+      if (this.validateTaskSuggestion(suggestion, config)) {
+        const task = await this.convertSuggestionToTask(suggestion);
+        await this.taskManager.updateTask(task);
+      }
+    }
+  }
+
+  private validateTaskSuggestion(suggestion: any, config: any): boolean {
+    if (!suggestion.title || !suggestion.description || !suggestion.assignee) {
+      return false;
+    }
+    return true;
   }
 
   async analyzeTask(data: TaskCreationData): Promise<TaskAnalysis> {
@@ -33,23 +103,7 @@ export class ModelConnector implements IModelConnector {
       Utwórz zadanie, które:
       1. Jest odpowiednie dla roli i uprawnień wykonawcy
       2. Jeśli to potrzebne, podziel je na podtaski dla podwładnych
-      3. Określ typ zadania
-      
-      Odpowiedź sformatuj jako JSON:
-      {
-        "title": "Tytuł zadania",
-        "description": "Szczegółowy opis głównego zadania",
-        "assignee_id": "${data.assigneeId}",
-        "type": "${data.type}",
-        "needs_split": true/false,
-        "subtasks": [
-          {
-            "title": "Tytuł podtaska",
-            "description": "Szczegółowy opis podtaska",
-            "type": "typ podtaska"
-          }
-        ]
-      }`;
+      3. Określ typ zadania`;
 
     const response = await fetch(this.API_URL, {
       method: "POST",
@@ -69,7 +123,8 @@ export class ModelConnector implements IModelConnector {
 
   async processTask(
     task: TaskWithSubordinates,
-    role: string
+    role: string,
+    permissions: string[]
   ): Promise<TaskResult | ReviewResult | FinalReviewResult> {
     const spinner = ora(`Przetwarzanie zadania dla roli ${role}...`).start();
 

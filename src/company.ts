@@ -1,8 +1,9 @@
 import fs from "fs-extra";
 import path from "path";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url"; // Dodano import
-import { TaskManager } from "./taskManager.js"; 
+import { fileURLToPath } from "url";
+import chalk from 'chalk';
+import { TaskManager } from "./taskManager.js";
 import { Employee } from "./employee.js";
 import { ModelConnector } from "./modelConnector.js";
 import { OutputHelper } from "./output/outputHelper.js";
@@ -14,10 +15,11 @@ import {
   displayProcessingResults,
   displayTasks,
 } from "./output/companyReporter.js";
+import { ConfigManager } from "./configManager.js";
+import { OrganizationStateManager } from "./organizationState.js";
 
 dotenv.config();
 
-// Implementacja __dirname dla ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -26,6 +28,8 @@ export class Company {
   private taskManager: TaskManager;
   private modelConnector: ModelConnector;
   private employees: Employee[];
+  private configManager: ConfigManager;
+  private orgStateManager: OrganizationStateManager;
   private processingReporter: TaskProcessingReporter;
 
   constructor() {
@@ -33,14 +37,52 @@ export class Company {
       employees: path.join(__dirname, "../data/employees"),
       tasks: path.join(__dirname, "../data/tasks"),
       conversations: path.join(__dirname, "../data/conversations"),
+      config: path.join(__dirname, "../data/config")
     };
 
     Object.values(this.paths).forEach((dir) => fs.ensureDirSync(dir));
+    
     this.taskManager = new TaskManager(this.paths);
-    this.modelConnector = new ModelConnector();
-    this.employees = [];
+    this.configManager = new ConfigManager(path.join(this.paths.config, "organization.json"));
+    this.orgStateManager = new OrganizationStateManager(this.paths.config);
+    this.modelConnector = new ModelConnector(this.paths.config, this.taskManager);
     this.processingReporter = new TaskProcessingReporter();
+    this.employees = [];
     this.loadEmployees();
+  }
+
+  public async runAutonomousProcesses(): Promise<void> {
+    try {
+      await this.modelConnector.analyzeOrganizationState();
+      await this.processAllTasks();
+    } catch (error) {
+      OutputHelper.error("Błąd w procesach autonomicznych: " + error);
+    }
+  }
+
+  public async viewOrganizationState(): Promise<void> {
+    const state = this.orgStateManager.getState();
+    console.log(chalk.blue("\nStan organizacji:"));
+    console.log(JSON.stringify(state, null, 2));
+  }
+
+  public async updateAutonomyConfig(): Promise<void> {
+    const { default: inquirer } = await import("inquirer");
+    const currentConfig = this.configManager.getConfig().autonomy;
+    
+    const { maxTasksPerDay } = await inquirer.prompt([
+      {
+        type: "number",
+        name: "maxTasksPerDay",
+        message: "Maksymalna liczba zadań dziennie:",
+        default: currentConfig.maxTasksPerDay
+      }
+    ]);
+
+    this.configManager.updateConfig({
+      autonomy: { ...currentConfig, maxTasksPerDay }
+    });
+    OutputHelper.success("Konfiguracja zaktualizowana");
   }
 
   private async loadEmployees(): Promise<void> {

@@ -1,16 +1,14 @@
-// src/types/modelConnector.types.ts
-import { Task, TaskAnalysis, TaskResult, ReviewResult, FinalReviewResult } from './task.types';
-import { TaskCreationData } from './task.types';
+import { Task, TaskAnalysis, TaskResult, ReviewResult, FinalReviewResult, TaskCreationData } from './task.types';
 import { MockAPIService } from '../mockServices';
 
-export interface IModelConnector {
-  externalServices: MockAPIService; // Zmieniamy na konkretny typ
 
+export interface IModelConnector {
+  externalServices: MockAPIService;
   analyzeTask(data: TaskCreationData): Promise<TaskAnalysis>;
-  
+  analyzeOrganizationState(): Promise<void>;
   processTask(
     task: Task,
     role: string,
     permissions: string[]
-  ): Promise<TaskResult | ReviewResult | FinalReviewResult | any>;
+  ): Promise<TaskResult | ReviewResult | FinalReviewResult>;
 }
