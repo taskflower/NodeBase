@@ -1,0 +1,44 @@
+{
+  "employees": [
+    {
+      "id": "martin-ceo",
+      "name": "Martin Smith",
+      "role": "CEO",
+      "permissions": ["all"],
+      "manages": ["anna-creative-director", "john-ads-director"],
+      "reports_to": null
+    },
+    {
+      "id": "anna-creative-director",
+      "name": "Anna Brown", 
+      "role": "Creative Director",
+      "permissions": ["creative_design", "content_creation", "campaign_planning"],
+      "manages": ["mary-designer", "tom-copywriter"],
+      "reports_to": "martin-ceo"
+    },
+    {
+      "id": "john-ads-director",
+      "name": "John Davis",
+      "role": "Advertising Director",
+      "permissions": ["media_buying", "performance_analysis", "budget_management"],
+      "manages": [],
+      "reports_to": "martin-ceo"
+    },
+    {
+      "id": "mary-designer",
+      "name": "Mary Wilson",
+      "role": "Designer",
+      "permissions": ["creative_design", "video_editing"],
+      "manages": [],
+      "reports_to": "anna-creative-director"
+    },
+    {
+      "id": "tom-copywriter",
+      "name": "Tom Anderson",
+      "role": "Copywriter",
+      "permissions": ["content_creation", "ad_copywriting"],
+      "manages": [],
+      "reports_to": "anna-creative-director"
+    }
+  ]
+}
