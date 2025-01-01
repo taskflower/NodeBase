@@ -1,4 +1,6 @@
 .env
 node_modules
+dist
+data
 id_ed25519_taskflower.pub
 id_ed25519_taskflower

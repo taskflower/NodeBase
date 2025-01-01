@@ -6,13 +6,25 @@ import { OutputHelper } from "./outputHelper.js"; // Dodano rozszerzenie .js
 import { Employee } from "../employee.js"; // Dodano rozszerzenie .js
 import { Task } from "../types/task.types.js"; // Dodano rozszerzenie .js
 import { TaskProcessingReporter } from "./taskProcessingReporter.js"; // Dodano rozszerzenie .js
+import { fileURLToPath } from "url";
+
+// Definicja __dirname w ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Wyświetla nagłówek w stylu ASCII art za pomocą figlet.
  * @param {string} title - Tytuł do wyświetlenia.
  */
 function displayHeader(title: string): void {
-  const output = figlet.textSync(title, { font: "Pagga" });
+  // const data = fs.readFileSync(
+  //   path.join(__dirname, "../fonts/", "Maxiwi.flf"),
+  //   "utf8"
+  // );
+  // figlet.parseFont("Miniwi", data);
+
+  const output = figlet.textSync(title, { font: "Standard" });
+  console.log("\n");
   console.log(chalk.gray(output));
 }
 
@@ -92,6 +104,7 @@ export function displayProcessingResults(
   // Wyświetlenie podsumowania
   const processedCount = processingReporter.getProcessedTasksCount();
   OutputHelper.success(
-    `Zakończono przetwarzanie wszystkich zadań (${processedCount} zadań).`
+    `█ Zakończono przetwarzanie wszystkich zadań (${processedCount} zadań).`
   );
+  OutputHelper.log("\n");
 }

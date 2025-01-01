@@ -31,7 +31,10 @@ async function resetApp() {
 }
 
 async function main() {
-  const output = figlet.textSync("TaskFlow", { font: "Univers" });
+  const output = figlet.textSync("TaskFlower", { font: "Roman" });
+  console.log("\n");
+  console.log("\n");
+  console.log("0.0.1");
   console.log(chalk.yellow(output));
   const { default: inquirer } = await import("inquirer"); // Dynamiczny import
   while (true) {
